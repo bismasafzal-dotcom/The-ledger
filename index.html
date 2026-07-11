@@ -12,7 +12,7 @@
 </head>
 <body>
 <div id="root"></div>
-<script type="text/babel" data-presets="react" data-type="script">
+<script type="text/plain" id="app-src">
 const { useState, useMemo } = React;
 
 /* ============================================================
@@ -547,5 +547,6 @@ const css = `
 
 ReactDOM.createRoot(document.getElementById("root")).render(<TrustLedger />);
 </script>
+   <script>(function(){var src=document.getElementById("app-src").textContent;var out=Babel.transform(src,{presets:[["react",{runtime:"classic"}]]}).code;(0,eval)(out);})();</script></script>
 </body>
 </html>
