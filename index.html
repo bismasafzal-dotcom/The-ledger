@@ -185,20 +185,32 @@ function scoreLiveOrg(filing, isFoundation) {
 /* ---------------- live API helpers ----------------
    Try ProPublica directly; if the browser blocks it (CORS),
    retry through a public CORS proxy. For production traffic,
-   replace PROXY with your own tiny proxy and be kind to
+   replace a RELAYS entry with your own tiny proxy and be kind to
    ProPublica's free servers (cache responses). */
-const PROXY = (u) => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u);
+const RELAYS = [
+  (u) => "https://corsproxy.io/?url=" + encodeURIComponent(u),
+  (u) => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u)
+];
 
 async function fetchJSON(url) {
+  // Try the direct call first (works if the API sends CORS headers).
   try {
     const r = await fetch(url);
-    if (!r.ok) throw new Error("HTTP " + r.status);
+    if (!r.ok) throw new Error("Direct failed (HTTP " + r.status + ")");
     return { data: await r.json(), via: "direct" };
-  } catch {
-    const r = await fetch(PROXY(url));
-    if (!r.ok) throw new Error("Proxy failed (HTTP " + r.status + ")");
-    return { data: await r.json(), via: "proxy" };
+  } catch (e) {
+    // Fall through to relays.
   }
+  // Try each public CORS relay in turn until one works.
+  let lastErr = null;
+  for (const relay of RELAYS) {
+    try {
+      const r = await fetch(relay(url));
+      if (!r.ok) throw new Error("Relay failed (HTTP " + r.status + ")");
+      return { data: await r.json(), via: "proxy" };
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error("All relays failed");
 }
 async function apiSearch(q) {
   const { data, via } = await fetchJSON(API_BASE + "/search.json?q=" + encodeURIComponent(q));
