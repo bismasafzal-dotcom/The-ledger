@@ -2,7 +2,7 @@
 
 Trust scores for U.S. nonprofits, computed transparently from their own IRS Form 990 filings.
 
-**Live demo:** _add your Netlify or GitHub Pages URL here_
+**Live demo:** [bismasafzal-dotcom.github.io/The-ledger](https://bismasafzal-dotcom.github.io/The-ledger/)
 
 ## What it does
 
